@@ -48,7 +48,7 @@ public class XmlToCsv {
 	public void csvWriter(ArrayList<String> input) throws IOException {
 		csvOutputCount++;
 		String output = csvHeader + "\n";
-		FileWriter writer=new FileWriter("csvOutput" + csvOutputCount + ".csv");{
+		FileWriter writer=new FileWriter(input.get(0).split(",")[1] + ".csv");{
 			for(int i = 0; i < input.size(); i++) {
 				output = output.concat(input.get(i) + "\n");
 			}
