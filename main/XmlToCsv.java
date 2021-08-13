@@ -11,6 +11,7 @@ import org.w3c.dom.Node;
 public class XmlToCsv {
 	
 	public String csvHeader = "";
+	int csvOutputCount = 0;
 	
 	public XmlToCsv() {
 		
@@ -23,23 +24,21 @@ public class XmlToCsv {
 	}
 	
 	public void processData(Document xmlInput) throws IOException {
-		
 		ArrayList<String> csvData = new ArrayList<String>();
-		
-		
 		Node node = xmlInput.getElementsByTagName("CSVIntervalData").item(0);
-		
 		Element eElement = (Element) node;
-
-		String[] data = eElement.getTextContent().split("\n");
-		
+		String[] data = eElement.getTextContent().split("\n");		
 		for(int i = 0; i < data.length; i++) {
 			if(data[i].length() >= 3) {
 				if(data[i].substring(0,3).matches("100")) {
 					csvHeader = data[i];
 				} else if(data[i].substring(0, 3).matches("200") || data[i].substring(0, 3).matches("900")) {
-					csvWriter(csvData);
-					csvData.clear();
+					if(!csvData.isEmpty()) {
+						csvWriter(csvData);
+						csvData.clear();
+					} else {
+						csvData.add(data[i]);
+					}
 				} else {
 					csvData.add(data[i]);
 				}
@@ -48,13 +47,16 @@ public class XmlToCsv {
 	}
 	
 	public void csvWriter(ArrayList<String> input) throws IOException {
-		for(int i = 0; i < input.size(); i++) {
-			System.out.println(input.get(i));
+		csvOutputCount++;
+		String output = csvHeader + "\n";
+		FileWriter writer=new FileWriter("csvOutput" + csvOutputCount + ".csv");{
+			for(int i = 0; i < input.size(); i++) {
+				output = output.concat(input.get(i) + "\n");
+			}
+			output = output.concat("900");
+			writer.write(output);
 		}
-		System.out.println("new file");
-		/*FileWriter writer=new FileWriter("testFile.csv");{
-			
-		}*/
+		writer.close();
 	}
 
 
