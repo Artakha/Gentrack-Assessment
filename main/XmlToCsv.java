@@ -36,9 +36,8 @@ public class XmlToCsv {
 					if(!csvData.isEmpty()) {
 						csvWriter(csvData);
 						csvData.clear();
-					} else {
-						csvData.add(data[i]);
 					}
+					csvData.add(data[i]);
 				} else {
 					csvData.add(data[i]);
 				}
