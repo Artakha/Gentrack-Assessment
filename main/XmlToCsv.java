@@ -11,7 +11,6 @@ import org.w3c.dom.Node;
 public class XmlToCsv {
 	
 	public String csvHeader = "";
-	int csvOutputCount = 0;
 	
 	public XmlToCsv() {
 		
@@ -46,7 +45,6 @@ public class XmlToCsv {
 	}
 	
 	public void csvWriter(ArrayList<String> input) throws IOException {
-		csvOutputCount++;
 		String output = csvHeader + "\n";
 		FileWriter writer=new FileWriter(input.get(0).split(",")[1] + ".csv");{
 			for(int i = 0; i < input.size(); i++) {
