@@ -1,31 +1,29 @@
-package main;
+package test;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.ArrayList;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-public class XmlToCsv {
+import main.XmlReader;
+
+class DataProcessingTest {
 	
-	public String csvHeader = "";
-	public String csvTrailer = "";
-	public int csvBlockCount = -1;
+	protected String csvHeader = "";
+	protected String csvTrailer = "";
+	protected int csvBlockCount = -1;
 	ArrayList<ArrayList<String>> csvData = new ArrayList<ArrayList<String>>(1);
 	
-	public XmlToCsv() {
-		
-	}
-	
-	public void runConverter() throws Exception {
+	@BeforeEach
+	void setUp() throws Exception {
 		XmlReader xmlReader = new XmlReader();
 		Document xmlInput = xmlReader.getXmlInput();
-		processData(xmlInput);
-	}
-	
-	public void processData(Document xmlInput) throws IOException {
 		Node node = xmlInput.getElementsByTagName("CSVIntervalData").item(0);
 		Element eElement = (Element) node;
 		String[] data = eElement.getTextContent().split("\n");		
@@ -34,7 +32,7 @@ public class XmlToCsv {
 				if(data[i].substring(0,3).matches("100")) { //set header for each csv file
 					csvHeader = data[i];
 				} else if(data[i].substring(0, 3).matches("200")) { //create new block for a new csv file
-					csvBlockCount++; // start new block
+					csvBlockCount++; 
 					ArrayList<String> csvBlock = new ArrayList<String>();
 					csvBlock.add(data[i]);
 					csvData.add(csvBlock);
@@ -45,22 +43,27 @@ public class XmlToCsv {
 				}
 			}
 		}
+	}
+
+	@Test
+	@DisplayName("Check header is the 100 row")
+	void testHeader() {
+		assertEquals("100", csvHeader.substring(0,3));
+	}
+	
+	@Test
+	@DisplayName("Check trailer is the 900 row")
+	void testTrailer() {
+		assertEquals("900", csvTrailer.substring(0,3));
+	}
+	
+	@Test
+	@DisplayName("Check each csv block starts with a 200 row")
+	void testCsvBlockStart(){
 		for(int i = 0; i < csvData.size(); i++) {
-			csvWriter(csvData.get(i)); //write all blocks to csv
+			assertEquals("200", csvData.get(i).get(0).substring(0,3));
 		}
 	}
 	
-	public void csvWriter(ArrayList<String> input) throws IOException {
-		String output = csvHeader + "\n";
-		FileWriter writer=new FileWriter(input.get(0).split(",")[1] + ".csv");{
-			for(int i = 0; i < input.size(); i++) {
-				output = output.concat(input.get(i) + "\n");
-			}
-			output = output.concat(csvTrailer);
-			writer.write(output);
-		}
-		writer.close();
-	}
-
 
 }
