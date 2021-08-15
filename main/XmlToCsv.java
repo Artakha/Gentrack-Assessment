@@ -11,6 +11,8 @@ import org.w3c.dom.Node;
 public class XmlToCsv {
 	
 	public String csvHeader = "";
+	public String csvTrailer = "";
+	public int arrayListCount = -1;
 	
 	public XmlToCsv() {
 		
@@ -23,24 +25,28 @@ public class XmlToCsv {
 	}
 	
 	public void processData(Document xmlInput) throws IOException {
-		ArrayList<String> csvData = new ArrayList<String>();
+		ArrayList<ArrayList<String>> csvData = new ArrayList<ArrayList<String>>(1);
 		Node node = xmlInput.getElementsByTagName("CSVIntervalData").item(0);
 		Element eElement = (Element) node;
 		String[] data = eElement.getTextContent().split("\n");		
 		for(int i = 0; i < data.length; i++) {
 			if(data[i].length() >= 3) {
-				if(data[i].substring(0,3).matches("100")) {
+				if(data[i].substring(0,3).matches("100")) { //set header for each csv file
 					csvHeader = data[i];
-				} else if(data[i].substring(0, 3).matches("200") || data[i].substring(0, 3).matches("900")) {
-					if(!csvData.isEmpty()) {
-						csvWriter(csvData);
-						csvData.clear();
-					}
-					csvData.add(data[i]);
-				} else {
-					csvData.add(data[i]);
+				} else if(data[i].substring(0, 3).matches("200")) { //create new block for a new csv file
+					arrayListCount++; 
+					ArrayList<String> csvBlock = new ArrayList<String>();
+					csvBlock.add(data[i]);
+					csvData.add(csvBlock);
+				} else if(data[i].substring(0, 3).matches("900")){ //set trailer for each csv file
+					csvTrailer = data[i];
+				} else if(data[i].substring(0, 3).matches("300")){ //add 300 data
+					csvData.get(arrayListCount).add(data[i]);
 				}
 			}
+		}
+		for(int i = 0; i < csvData.size(); i++) {
+			csvWriter(csvData.get(i)); //write all blocks to csv
 		}
 	}
 	
@@ -50,7 +56,7 @@ public class XmlToCsv {
 			for(int i = 0; i < input.size(); i++) {
 				output = output.concat(input.get(i) + "\n");
 			}
-			output = output.concat("900");
+			output = output.concat(csvTrailer);
 			writer.write(output);
 		}
 		writer.close();
